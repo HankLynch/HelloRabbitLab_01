@@ -33,23 +33,12 @@ namespace Grains
 
         public Task OnNextAsync(string item, StreamSequenceToken? token = null)
         {
-            _logger.LogInformation($"ConfigureOnDemand Received message from queue: {item} **************************");
+            //_logger.LogInformation($"ConfigureOnDemand Received message from queue: {item} **************************");
+            Console.WriteLine(item);
             return Task.CompletedTask;
         }
 
-        //private Task OnNextAsync(IList<SequentialItem<string>> arg)
-        //{
-        //    foreach (var item in arg)
-        //    {
-        //        _logger.LogInformation($"ConfigureOnDemand Received message from queue: {item.Item}");
-        //    }
-            
-        //    return Task.CompletedTask;
-
-        //}
-
-
-
+       
 
         public Task OnCompletedAsync()
         {

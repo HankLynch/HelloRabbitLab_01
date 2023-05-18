@@ -66,14 +66,21 @@ static async Task<IHost> StartClientAsync()
 static async Task DoClientWorkAsync(IClusterClient client)
 {
     var configurable = client.GetGrain<IConfigureOnDemand>("NamedGrain");
-    await configurable.Initialize("bob");
+    await configurable.Initialize("bobo");
 
     var friend = client.GetGrain<IHello>(0);
     var response = await friend.SayHello("Good morning, HelloGrain!");
 
     Console.WriteLine($"\n\n{response}\n\n");
     var sender = client.GetGrain<IProducerGrain>(0);
+    await sender.SendMessage(DateTime.Now.Second.ToString() +":"+ DateTime.Now.Millisecond.ToString());
+    for (int i = 0; i < 100; i++)
+    {
+        await sender.SendMessage($"Message {i}");
+    }
     await sender.SendMessage("Sender says hells yeah!");
+    await sender.SendMessage(DateTime.Now.Second.ToString() + ":" + DateTime.Now.Millisecond.ToString());
+
     Console.WriteLine("Message Sent");
 
 }

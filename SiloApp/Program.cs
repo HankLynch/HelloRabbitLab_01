@@ -38,7 +38,8 @@ static async Task<IHost> StartSiloAsync()
                     options.Password = "guest";
                     options.VirtualHost = "/";
                     options.ClientProvidedName = "Silo-Queue";
-                });
+                })
+                ;
         });
 
     var host = builder.Build();

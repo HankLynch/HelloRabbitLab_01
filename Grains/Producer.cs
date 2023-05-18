@@ -53,7 +53,7 @@ public class ProducerGrain : Grain, IProducerGrain, IAsyncObserver<string>
     public async Task SendMessage(string message)
     {
         var streamProvider = this.GetStreamProvider("Hank");
-        var stream = streamProvider.GetStream<string>("PipelineID", "bob");  //this targets the next grain in the pipeline
+        var stream = streamProvider.GetStream<string>("PipelineID", "bobo");  //this targets the next grain in the pipeline
         await stream.OnNextAsync(message);
     }
 
