@@ -1,5 +1,7 @@
-﻿using Microsoft.Extensions.Hosting;
+﻿using Escendit.Orleans.Streaming.RabbitMQ.Options;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Orleans.Hosting;
 
 try
 {
@@ -18,12 +20,25 @@ catch (Exception ex)
 }
 
 static async Task<IHost> StartSiloAsync()
-{
+{   
     var builder = new HostBuilder()
+        
         .UseOrleans(silo =>
         {
             silo.UseLocalhostClustering()
-                .ConfigureLogging(logging => logging.AddConsole());
+                .ConfigureLogging(logging => logging.AddConsole())
+                .AddMemoryGrainStorageAsDefault()
+                .AddMemoryGrainStorage("PubSubStore")
+                .AddStreaming()
+                .AddRabbitMqStreaming("Hank")
+                .WithQueue(options =>
+                {
+                    options.Endpoints.Add(new RabbitEndpoint { HostName = "localhost", Port = 5672 });
+                    options.UserName = "guest";
+                    options.Password = "guest";
+                    options.VirtualHost = "/";
+                    options.ClientProvidedName = "Silo-Queue";
+                });
         });
 
     var host = builder.Build();

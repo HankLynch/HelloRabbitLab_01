@@ -7,38 +7,30 @@ using RabbitMQ.Stream.Client;
 
 namespace Grains;
 
-public class HelloGrain : Grain, IHello, IAsyncObserver<string>
+public class ProducerGrain : Grain, IProducerGrain, IAsyncObserver<string>
 {
     private readonly ILogger _logger;
     private StreamSubscriptionHandle<string>? _streamSubscriptionHandle;
     private IAsyncStream<string> _stream;
+    private IStreamProvider _streamProvider;
 
-    public HelloGrain(ILogger<HelloGrain> logger) => _logger = logger;
+    public ProducerGrain(ILogger<HelloGrain> logger) => _logger = logger;
 
-    ValueTask<string> IHello.SayHello(string greeting)
-    {
-        _logger.LogInformation(
-            "SayHello message received: greeting = '{Greeting}'", greeting);
 
-        return ValueTask.FromResult(
-            $"""
-            Client said: '{greeting}', so HelloGrain says: Hello!
-            """);
-    }
 
     //==========================================================================
-   
 
 
-  
+
+
     public override async Task OnActivateAsync(CancellationToken cancellationToken)
     {
-        var streamProvider = this.GetStreamProvider("Hank");
-        var stream = streamProvider.GetStream<string>("PipelineID", "bob");
+        _streamProvider = this.GetStreamProvider("Hank");
+        _stream = _streamProvider.GetStream<string>("PipelineID", "bob1");           //     , Guid.Empty);
 
         if (_streamSubscriptionHandle is null)
         {
-            _streamSubscriptionHandle = await stream.SubscribeAsync(OnNextAsync);
+            _streamSubscriptionHandle = await _stream.SubscribeAsync(OnNextAsync);
         }
         else
         {
@@ -52,9 +44,8 @@ public class HelloGrain : Grain, IHello, IAsyncObserver<string>
     {
         foreach (var item in arg)
         {
-            _logger.LogInformation($"Received message from queue: {item.Item}");
+            _logger.LogInformation($"Received message but shouldn't: {item.Item}");
         }
-        SendMessage("Thanks Bob");
         return Task.CompletedTask;
 
     }
@@ -62,13 +53,13 @@ public class HelloGrain : Grain, IHello, IAsyncObserver<string>
     public async Task SendMessage(string message)
     {
         var streamProvider = this.GetStreamProvider("Hank");
-        var stream = streamProvider.GetStream<string>("PipelineID1", "bob");
+        var stream = streamProvider.GetStream<string>("PipelineID", "bob");  //this targets the next grain in the pipeline
         await stream.OnNextAsync(message);
     }
 
     public Task ReceiveMessage(string message)
     {
-        _logger.LogInformation($"Received message: {message}");
+        _logger.LogInformation($"I shouldn't get this: {message}");
         return Task.CompletedTask;
         //await _stream.OnNextAsync(42);
     }
