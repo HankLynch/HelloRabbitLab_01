@@ -20,6 +20,8 @@ public class HelloGrain : Grain, IHello, IAsyncObserver<string>
         _logger.LogInformation(
             "SayHello message received: greeting = '{Greeting}'", greeting);
 
+        _logger.LogInformation("This call happened on {Date}", DateTime.Now.ToString("yyyyMMdd"));
+
         return ValueTask.FromResult(
             $"""
             Client said: '{greeting}', so HelloGrain says: Hello!
